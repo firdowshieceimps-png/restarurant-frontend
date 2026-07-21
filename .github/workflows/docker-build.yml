@@ -6,28 +6,27 @@ on:
       - main
 
 jobs:
-
   docker-build-push:
-
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
+            -t firdowshieceimps/restaurant-frontend:1.0 \
+            -t firdowshieceimps/restaurant-frontend:latest .
 
-    - name: Build Docker image
-      run: |
-        docker build \
-        --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
-        -t firdowshieceimps/restaurant-frontend:1.0 .
-
-    - name: Push Docker image
-      run: |
-        docker push firdowshieceimps/restaurant-frontend:latest
+      - name: Push Docker images
+        run: |
+          docker push firdowshieceimps/restaurant-frontend:1.0
+          docker push firdowshieceimps/restaurant-frontend:latest
