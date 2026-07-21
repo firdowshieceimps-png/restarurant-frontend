@@ -16,7 +16,7 @@ import EditMenu from "./pages/admin/EditMenu";
 import Reservations from "./pages/Reservations";
 import ManageReservations from "./pages/admin/ManageReservations";
 import ManageOrders from "./pages/admin/ManageOrders";
-import AdminFeedback from "./pages/AdminFeedback";
+import AdminFeedback from "./pages/admin/AdminFeedback";
  
 function App() {
 
