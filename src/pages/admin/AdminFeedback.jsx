@@ -6,13 +6,13 @@ function AdminFeedback() {
   const [feedbacks, setFeedbacks] = useState([]);
 
   useEffect(() => {
-    getFeedback();
+    fetchFeedback();
   }, []);
 
-  const getFeedback = async () => {
+  const fetchFeedback = async () => {
     try {
-      const { data } = await api.get("/feedback");
-      setFeedbacks(data);
+      const response = await api.get("/feedback");
+      setFeedbacks(response.data.data);
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to load feedback");
     }
@@ -22,7 +22,7 @@ function AdminFeedback() {
     <div className="container mt-4">
       <div className="card shadow">
         <div className="card-header bg-dark text-white">
-          <h3 className="mb-0">Customer Feedback</h3>
+          <h3 className="mb-0">Manage Feedback</h3>
         </div>
 
         <div className="card-body">
@@ -44,9 +44,9 @@ function AdminFeedback() {
                   <tr key={feedback._id}>
                     <td>{index + 1}</td>
 
-                    <td>{feedback.customer?.name}</td>
+                    <td>{feedback.customer.name}</td>
 
-                    <td>{feedback.customer?.email}</td>
+                    <td>{feedback.customer.email}</td>
 
                     <td>{"⭐".repeat(feedback.rating)}</td>
 
