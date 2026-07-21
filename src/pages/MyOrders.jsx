@@ -34,6 +34,9 @@ function MyOrders() {
               <h5>Order ID</h5>
               <p>{order._id}</p>
 
+              <h5>Order Name</h5>
+              <p>{order.name}</p>
+
               <h5>Total Amount</h5>
               <p>₹ {order.totalAmount}</p>
 
