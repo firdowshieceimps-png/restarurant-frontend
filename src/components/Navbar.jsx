@@ -17,7 +17,6 @@ function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
-
         <Link className="navbar-brand fw-bold" to="/">
           🍽 Smart Restaurant
         </Link>
@@ -32,9 +31,7 @@ function Navbar() {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarNav">
-
           <ul className="navbar-nav ms-auto">
-
             {/* Home */}
             <li className="nav-item">
               <Link className="nav-link" to="/">
@@ -51,19 +48,19 @@ function Navbar() {
               </Link>
             </li>
 
-            {/* Cart */}
-             {user && (
-            <li className="nav-item">
-              <Link className="nav-link" to="/cart">
-                <i className="bi bi-cart3 me-1"></i>
-                Cart
-                <span className="badge bg-danger ms-1">
-                  {cartItems.length}
-                </span>
-              </Link>
-            </li>
-
+            {user ? (
               <>
+                {/* Cart */}
+                <li className="nav-item">
+                  <Link className="nav-link" to="/cart">
+                    <i className="bi bi-cart3 me-1"></i>
+                    Cart
+                    <span className="badge bg-danger ms-1">
+                      {cartItems.length}
+                    </span>
+                  </Link>
+                </li>
+
                 {/* Customer Dropdown */}
                 <li className="nav-item dropdown">
                   <a
@@ -76,7 +73,6 @@ function Navbar() {
                   </a>
 
                   <ul className="dropdown-menu">
-
                     <li>
                       <Link className="dropdown-item" to="/orders">
                         <i className="bi bi-bag me-2"></i>
@@ -97,14 +93,12 @@ function Navbar() {
                         Feedback
                       </Link>
                     </li>
-
                   </ul>
                 </li>
 
                 {/* Admin Dropdown */}
                 {user.role === "admin" && (
                   <li className="nav-item dropdown">
-
                     <a
                       className="nav-link dropdown-toggle text-warning"
                       href="#"
@@ -115,7 +109,6 @@ function Navbar() {
                     </a>
 
                     <ul className="dropdown-menu">
-
                       <li>
                         <Link
                           className="dropdown-item"
@@ -126,10 +119,7 @@ function Navbar() {
                       </li>
 
                       <li>
-                        <Link
-                          className="dropdown-item"
-                          to="/admin/menu"
-                        >
+                        <Link className="dropdown-item" to="/admin/menu">
                           Manage Menu
                         </Link>
                       </li>
@@ -169,15 +159,12 @@ function Navbar() {
                           Manage Feedback
                         </Link>
                       </li>
-
                     </ul>
-
                   </li>
                 )}
 
                 {/* User Dropdown */}
                 <li className="nav-item dropdown">
-
                   <a
                     className="nav-link dropdown-toggle text-warning"
                     href="#"
@@ -189,7 +176,6 @@ function Navbar() {
                   </a>
 
                   <ul className="dropdown-menu dropdown-menu-end">
-
                     <li>
                       <button
                         className="dropdown-item text-danger"
@@ -199,14 +185,10 @@ function Navbar() {
                         Logout
                       </button>
                     </li>
-
                   </ul>
-
                 </li>
               </>
-            )}
-
-            {!user && (
+            ) : (
               <>
                 <li className="nav-item">
                   <Link className="nav-link" to="/login">
@@ -215,18 +197,13 @@ function Navbar() {
                 </li>
 
                 <li className="nav-item">
-                  <Link
-                    className="btn btn-success ms-2"
-                    to="/register"
-                  >
+                  <Link className="btn btn-success ms-2" to="/register">
                     Register
                   </Link>
                 </li>
               </>
             )}
-
           </ul>
-
         </div>
       </div>
     </nav>
