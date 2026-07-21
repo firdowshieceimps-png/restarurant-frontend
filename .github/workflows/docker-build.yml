@@ -6,7 +6,28 @@ on:
       - main
 
 jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build React App
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+        run: npm run build
+
   docker-build-push:
+    needs: validate-and-test
     runs-on: ubuntu-latest
 
     steps:
@@ -19,14 +40,14 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build Docker Image
         run: |
           docker build \
             --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
             -t firdowshieceimps/restaurant-frontend:1.0 \
             -t firdowshieceimps/restaurant-frontend:latest .
 
-      - name: Push Docker images
+      - name: Push Docker Images
         run: |
           docker push firdowshieceimps/restaurant-frontend:1.0
           docker push firdowshieceimps/restaurant-frontend:latest
