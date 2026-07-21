@@ -16,6 +16,7 @@ import EditMenu from "./pages/admin/EditMenu";
 import Reservations from "./pages/Reservations";
 import ManageReservations from "./pages/admin/ManageReservations";
 import ManageOrders from "./pages/admin/ManageOrders";
+import AdminFeedback from "./pages/AdminFeedback";
  
 function App() {
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/reservation" element={<Reservations />} />
         <Route path="/admin/reservations" element={<ManageReservations />}/>
         <Route path="/admin/orders" element={<ManageOrders />}/>
+        <Route path="/admin/feedback" element={<AdminFeedback />}/>
 
       </Routes>
 
