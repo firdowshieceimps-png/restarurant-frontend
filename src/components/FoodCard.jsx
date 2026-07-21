@@ -1,18 +1,31 @@
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { addToCart } from "../redux/slices/cartSlice";
 
 function FoodCard({ item }) {
-
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { user } = useSelector((state) => state.auth);
+
+  const handleAddToCart = () => {
+    if (!user) {
+      toast.info("Please login to add items to cart.");
+      navigate("/login");
+      return;
+    }
+
+    dispatch(addToCart(item));
+    toast.success("Item added to cart");
+  };
 
   return (
     <div className="col-md-4 mb-4">
       <div className="card shadow h-100">
 
         <img
-          //src={item.image}
           src={`/images/${item.image}`}
           className="card-img-top"
           alt={item.name}
@@ -43,10 +56,7 @@ function FoodCard({ item }) {
           <button
             className="btn btn-primary w-100"
             disabled={!item.available}
-            onClick={() => {
-              dispatch(addToCart(item));
-              toast.success("Item added to cart");
-            }}
+            onClick={handleAddToCart}
           >
             <i className="bi bi-cart-plus me-2"></i>
             Add To Cart
