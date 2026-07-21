@@ -52,6 +52,7 @@ function Navbar() {
             </li>
 
             {/* Cart */}
+             {user && (
             <li className="nav-item">
               <Link className="nav-link" to="/cart">
                 <i className="bi bi-cart3 me-1"></i>
@@ -62,7 +63,6 @@ function Navbar() {
               </Link>
             </li>
 
-            {user && (
               <>
                 {/* Customer Dropdown */}
                 <li className="nav-item dropdown">
