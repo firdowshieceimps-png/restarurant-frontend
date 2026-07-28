@@ -1,28 +1,55 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { toast } from "react-toastify";
 
 function Reservations() {
   const [formData, setFormData] = useState({
-    tableNumber: "",
     reservationDate: "",
     reservationTime: "",
     numberOfGuests: "",
+    tableNumber: "",
   });
 
+  const [tables, setTables] = useState([]);
   const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
     fetchReservations();
   }, []);
 
+  useEffect(() => {
+    if (
+      formData.reservationDate &&
+      formData.reservationTime
+    ) {
+      fetchAvailableTables();
+    }
+  }, [
+    formData.reservationDate,
+    formData.reservationTime,
+  ]);
+
   const fetchReservations = async () => {
     try {
-     // const res = await api.get("/reservations/my");
-      const res = await api.get("/reservations/my-reservations");
+      const res = await api.get(
+        "/reservations/my-reservations"
+      );
+
       setReservations(res.data.data);
     } catch (error) {
       toast.error("Failed to load reservations");
+    }
+  };
+
+  const fetchAvailableTables = async () => {
+    try {
+      const res = await api.get(
+        `/tables/available?date=${formData.reservationDate}&time=${formData.reservationTime}`
+      );
+
+      setTables(res.data.data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -37,58 +64,40 @@ function Reservations() {
     e.preventDefault();
 
     try {
-      const res = await api.post("/reservations", formData);
+      const res = await api.post(
+        "/reservations",
+        formData
+      );
 
       toast.success(res.data.message);
 
       setFormData({
-        tableNumber: "",
         reservationDate: "",
         reservationTime: "",
         numberOfGuests: "",
+        tableNumber: "",
       });
 
       fetchReservations();
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Reservation failed"
+        error.response?.data?.message ||
+          "Reservation failed"
       );
-    }
-  };
-
-  const cancelReservation = async (id) => {
-    try {
-      await api.put(`/reservations/cancel/${id}`);
-
-      toast.success("Reservation cancelled");
-
-      fetchReservations();
-    } catch (error) {
-      toast.error("Unable to cancel reservation");
     }
   };
 
   return (
     <div className="container mt-4">
 
-      <div className="card shadow p-4 mb-5">
-        <h2 className="mb-4">Reserve a Table</h2>
+      <div className="card shadow p-4 mb-4">
+        <h2 className="mb-4">
+          Reserve a Table
+        </h2>
 
         <form onSubmit={handleSubmit}>
 
           <div className="row">
-
-            <div className="col-md-3 mb-3">
-              <input
-                type="number"
-                name="tableNumber"
-                className="form-control"
-                placeholder="Table Number"
-                value={formData.tableNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
 
             <div className="col-md-3 mb-3">
               <input
@@ -97,6 +106,11 @@ function Reservations() {
                 className="form-control"
                 value={formData.reservationDate}
                 onChange={handleChange}
+                min={
+                  new Date()
+                    .toISOString()
+                    .split("T")[0]
+                }
                 required
               />
             </div>
@@ -120,8 +134,38 @@ function Reservations() {
                 placeholder="Guests"
                 value={formData.numberOfGuests}
                 onChange={handleChange}
+                min="1"
                 required
               />
+            </div>
+
+            <div className="col-md-3 mb-3">
+              <select
+                name="tableNumber"
+                className="form-select"
+                value={formData.tableNumber}
+                onChange={handleChange}
+                required
+              >
+                <option value="">
+                  Select Table
+                </option>
+
+                {tables
+                  .filter(
+                    (table) => table.available
+                  )
+                  .map((table) => (
+                    <option
+                      key={table._id}
+                      value={table.tableNumber}
+                    >
+                      Table {table.tableNumber}
+                      {" - "}
+                      Capacity {table.capacity}
+                    </option>
+                  ))}
+              </select>
             </div>
 
           </div>
@@ -131,73 +175,96 @@ function Reservations() {
           </button>
 
         </form>
+      </div>
 
+      <div className="card shadow p-4 mb-4">
+        <h3 className="mb-3">
+          Table Availability
+        </h3>
+
+        <table className="table table-bordered">
+          <thead>
+            <tr>
+              <th>Table</th>
+              <th>Capacity</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {tables.map((table) => (
+              <tr key={table._id}>
+                <td>
+                  Table {table.tableNumber}
+                </td>
+
+                <td>
+                  {table.capacity} Guests
+                </td>
+
+                <td>
+                  {table.available ? (
+                    <span className="badge bg-success">
+                      Available
+                    </span>
+                  ) : (
+                    <span className="badge bg-danger">
+                      Booked
+                    </span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+
+        </table>
       </div>
 
       <div className="card shadow p-4">
-
-        <h2 className="mb-4">My Reservations</h2>
+        <h3 className="mb-3">
+          My Reservations
+        </h3>
 
         <table className="table table-bordered">
-
           <thead>
-
             <tr>
               <th>Table</th>
               <th>Date</th>
               <th>Time</th>
               <th>Guests</th>
               <th>Status</th>
-              <th>Action</th>
             </tr>
-
           </thead>
 
           <tbody>
-
-            {reservations.map((reservation) => (
-              <tr key={reservation._id}>
-
-                <td>{reservation.tableNumber}</td>
+            {reservations.map((r) => (
+              <tr key={r._id}>
+                <td>{r.tableNumber}</td>
 
                 <td>
                   {new Date(
-                    reservation.reservationDate
+                    r.reservationDate
                   ).toLocaleDateString()}
                 </td>
 
-                <td>{reservation.reservationTime}</td>
+                <td>
+                  {r.reservationTime}
+                </td>
 
-                <td>{reservation.numberOfGuests}</td>
+                <td>
+                  {r.numberOfGuests}
+                </td>
 
                 <td>
                   <span className="badge bg-primary">
-                    {reservation.status}
+                    {r.status}
                   </span>
                 </td>
-
-                <td>
-
-                  {reservation.status === "Booked" && (
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() =>
-                        cancelReservation(reservation._id)
-                      }
-                    >
-                      Cancel
-                    </button>
-                  )}
-
-                </td>
-
               </tr>
             ))}
-
           </tbody>
 
         </table>
-
       </div>
 
     </div>
