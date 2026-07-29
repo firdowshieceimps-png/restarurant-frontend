@@ -7,29 +7,28 @@ function Reservations() {
     reservationDate: "",
     reservationTime: "",
     numberOfGuests: "",
-    tableNumber: "",
   });
 
   const [tables, setTables] = useState([]);
   const [reservations, setReservations] = useState([]);
 
- useEffect(() => {
-  fetchReservations();
-}, []);
+  useEffect(() => {
+    fetchReservations();
+  }, []);
 
-useEffect(() => {
-  if (
-    formData.reservationDate &&
-    formData.reservationTime &&
-    formData.numberOfGuests
-  ) {
-    fetchAvailableTables();
-  }
-}, [
-  formData.reservationDate,
-  formData.reservationTime,
-  formData.numberOfGuests,
-]);
+  useEffect(() => {
+    if (
+      formData.reservationDate &&
+      formData.reservationTime &&
+      formData.numberOfGuests
+    ) {
+      fetchAvailableTables();
+    }
+  }, [
+    formData.reservationDate,
+    formData.reservationTime,
+    formData.numberOfGuests,
+  ]);
 
   const fetchReservations = async () => {
     try {
@@ -43,25 +42,17 @@ useEffect(() => {
     }
   };
 
-const fetchAvailableTables = async () => {
-  try {
-    if (
-      !formData.reservationDate ||
-      !formData.reservationTime ||
-      !formData.numberOfGuests
-    ) {
-      return;
+  const fetchAvailableTables = async () => {
+    try {
+      const res = await api.get(
+        `/tables/available?date=${formData.reservationDate}&time=${formData.reservationTime}&guests=${formData.numberOfGuests}`
+      );
+
+      setTables(res.data.data);
+    } catch (error) {
+      console.log(error);
     }
-
-    const res = await api.get(
-      `/tables/available?date=${formData.reservationDate}&time=${formData.reservationTime}&guests=${formData.numberOfGuests}`
-    );
-
-    setTables(res.data.data);
-  } catch (error) {
-    console.log(error);
-  }
-};
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -85,8 +76,9 @@ const fetchAvailableTables = async () => {
         reservationDate: "",
         reservationTime: "",
         numberOfGuests: "",
-        tableNumber: "",
       });
+
+      setTables([]);
 
       fetchReservations();
     } catch (error) {
@@ -99,17 +91,21 @@ const fetchAvailableTables = async () => {
 
   return (
     <div className="container mt-4">
-
+      {/* Reservation Form */}
       <div className="card shadow p-4 mb-4">
         <h2 className="mb-4">
           Reserve a Table
         </h2>
 
+        <div className="alert alert-info">
+          The system will automatically assign
+          the best available table based on the
+          number of guests.
+        </div>
+
         <form onSubmit={handleSubmit}>
-
           <div className="row">
-
-            <div className="col-md-3 mb-3">
+            <div className="col-md-4 mb-3">
               <input
                 type="date"
                 name="reservationDate"
@@ -125,7 +121,7 @@ const fetchAvailableTables = async () => {
               />
             </div>
 
-            <div className="col-md-3 mb-3">
+            <div className="col-md-4 mb-3">
               <input
                 type="time"
                 name="reservationTime"
@@ -136,100 +132,75 @@ const fetchAvailableTables = async () => {
               />
             </div>
 
-            <div className="col-md-3 mb-3">
+            <div className="col-md-4 mb-3">
               <input
                 type="number"
                 name="numberOfGuests"
                 className="form-control"
-                placeholder="Guests"
+                placeholder="Number of Guests"
                 value={formData.numberOfGuests}
                 onChange={handleChange}
                 min="1"
                 required
               />
             </div>
-
-            <div className="col-md-3 mb-3">
-              <select
-                name="tableNumber"
-                className="form-select"
-                value={formData.tableNumber}
-                onChange={handleChange}
-                required
-              >
-                <option value="">
-                  Select Table
-                </option>
-
-                {tables
-                  .filter(
-                    (table) => table.available
-                  )
-                  .map((table) => (
-                    <option
-                      key={table._id}
-                      value={table.tableNumber}
-                    >
-                      Table {table.tableNumber}
-                      {" - "}
-                      Capacity {table.capacity}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
           </div>
 
-          <button className="btn btn-success">
+          <button
+            type="submit"
+            className="btn btn-success"
+          >
             Reserve Table
           </button>
-
         </form>
       </div>
 
-      <div className="card shadow p-4 mb-4">
-        <h3 className="mb-3">
-          Table Availability
-        </h3>
+      {/* Available Tables */}
+      {tables.length > 0 && (
+        <div className="card shadow p-4 mb-4">
+          <h3 className="mb-3">
+            Available Tables
+          </h3>
 
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>Table</th>
-              <th>Capacity</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {tables.map((table) => (
-              <tr key={table._id}>
-                <td>
-                  Table {table.tableNumber}
-                </td>
-
-                <td>
-                  {table.capacity} Guests
-                </td>
-
-                <td>
-                  {table.available ? (
-                    <span className="badge bg-success">
-                      Available
-                    </span>
-                  ) : (
-                    <span className="badge bg-danger">
-                      Booked
-                    </span>
-                  )}
-                </td>
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Table</th>
+                <th>Capacity</th>
+                <th>Status</th>
               </tr>
-            ))}
-          </tbody>
+            </thead>
 
-        </table>
-      </div>
+            <tbody>
+              {tables.map((table) => (
+                <tr key={table._id}>
+                  <td>
+                    Table {table.tableNumber}
+                  </td>
 
+                  <td>
+                    {table.capacity} Guests
+                  </td>
+
+                  <td>
+                    {table.available ? (
+                      <span className="badge bg-success">
+                        Available
+                      </span>
+                    ) : (
+                      <span className="badge bg-danger">
+                        Booked
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* My Reservations */}
       <div className="card shadow p-4">
         <h3 className="mb-3">
           My Reservations
@@ -247,36 +218,46 @@ const fetchAvailableTables = async () => {
           </thead>
 
           <tbody>
-            {reservations.map((r) => (
-              <tr key={r._id}>
-                <td>{r.tableNumber}</td>
+            {reservations.map((reservation) => (
+              <tr key={reservation._id}>
+                <td>
+                  {reservation.tableNumber}
+                </td>
 
                 <td>
                   {new Date(
-                    r.reservationDate
+                    reservation.reservationDate
                   ).toLocaleDateString()}
                 </td>
 
                 <td>
-                  {r.reservationTime}
+                  {reservation.reservationTime}
                 </td>
 
                 <td>
-                  {r.numberOfGuests}
+                  {reservation.numberOfGuests}
                 </td>
 
                 <td>
-                  <span className="badge bg-primary">
-                    {r.status}
+                  <span
+                    className={`badge ${
+                      reservation.status ===
+                      "Booked"
+                        ? "bg-success"
+                        : reservation.status ===
+                          "Cancelled"
+                        ? "bg-danger"
+                        : "bg-secondary"
+                    }`}
+                  >
+                    {reservation.status}
                   </span>
                 </td>
               </tr>
             ))}
           </tbody>
-
         </table>
       </div>
-
     </div>
   );
 }
