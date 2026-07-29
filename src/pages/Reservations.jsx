@@ -13,21 +13,23 @@ function Reservations() {
   const [tables, setTables] = useState([]);
   const [reservations, setReservations] = useState([]);
 
-  useEffect(() => {
-    fetchReservations();
-  }, []);
+ useEffect(() => {
+  fetchReservations();
+}, []);
 
-  useEffect(() => {
-    if (
-      formData.reservationDate &&
-      formData.reservationTime
-    ) {
-      fetchAvailableTables();
-    }
-  }, [
-    formData.reservationDate,
-    formData.reservationTime,
-  ]);
+useEffect(() => {
+  if (
+    formData.reservationDate &&
+    formData.reservationTime &&
+    formData.numberOfGuests
+  ) {
+    fetchAvailableTables();
+  }
+}, [
+  formData.reservationDate,
+  formData.reservationTime,
+  formData.numberOfGuests,
+]);
 
   const fetchReservations = async () => {
     try {
@@ -41,17 +43,25 @@ function Reservations() {
     }
   };
 
-  const fetchAvailableTables = async () => {
-    try {
-      const res = await api.get(
-        `/tables/available?date=${formData.reservationDate}&time=${formData.reservationTime}`
-      );
-
-      setTables(res.data.data);
-    } catch (error) {
-      console.log(error);
+const fetchAvailableTables = async () => {
+  try {
+    if (
+      !formData.reservationDate ||
+      !formData.reservationTime ||
+      !formData.numberOfGuests
+    ) {
+      return;
     }
-  };
+
+    const res = await api.get(
+      `/tables/available?date=${formData.reservationDate}&time=${formData.reservationTime}&guests=${formData.numberOfGuests}`
+    );
+
+    setTables(res.data.data);
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   const handleChange = (e) => {
     setFormData({
